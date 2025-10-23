@@ -8,7 +8,8 @@ import Footer from "./components/Footer";
 import VolunteerAuth from "./pages/VolunteerLogin";
 import { useState } from "react";
 import RefreshHandler from "./RefreshHandler";
-
+import NGOLogin from "./pages/NGOLogin";
+import { ToastContainer } from "react-toastify"
 function App() {
   const[ isAuthenticated,setIsAuthenticated] = useState(false);
   const PrivateRoute = ({element})=>{
@@ -17,6 +18,7 @@ function App() {
   return (
     <Router>
       <div className="flex flex-col min-h-screen">
+        <ToastContainer/>
         <RefreshHandler setIsAuthenticated={setIsAuthenticated}/>
         <Navbar isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />
         <main className="flex-grow">
@@ -25,6 +27,7 @@ function App() {
             <Route path="/volunteer" element={<PrivateRoute element={<VolunteerPage/>}/>}/>
             <Route path="/ngo" element={<NGOPage />} />
             <Route path="/login" element={<VolunteerAuth/>}/>
+            <Route path="/ngologin" element = {<NGOLogin/>}/>
           </Routes>
         </main>
         <Footer />
