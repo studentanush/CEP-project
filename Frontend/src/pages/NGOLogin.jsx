@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import Lottie from "lottie-react";
 import { FaUser, FaEnvelope, FaLock, FaPhone } from "react-icons/fa";
 import animationData from "../assets/NGOLogin.json";
@@ -6,13 +6,14 @@ import axios from "axios";
 import { BACKEND_URL } from "../config";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { ContextAPI } from "../Context";
 const NGOLogin = () => {
     const[name,setName] = useState("");
     const[email,setEmail] = useState("");
     const[password,setPassword] = useState("");
     const[number,setNumber] = useState("");
   const [isSignup, setIsSignup] = useState(false);
-
+  const {setIsUserAuthenticated} = useContext(ContextAPI);
   const navigate = useNavigate();
     const onSubmitHandler = async(e)=>{
         e.preventDefault();
@@ -52,10 +53,19 @@ const NGOLogin = () => {
                 setPassword("");
                 const token = response.data.token;
                 const name = response.data.user.name;
-                localStorage.setItem("name",name);
-                localStorage.setItem("token",token);
+                const emaiL = response.data.user.email;
+                const ngodetails = {
+                    token:token,
+                    name:name,
+                    email:emaiL,
+                    
+                }
+                localStorage.setItem("ngo-info",JSON.stringify(ngodetails));
                 localStorage.removeItem("user-info");
-                navigate("/ngo")
+                setIsUserAuthenticated(false);
+
+                navigate("/ngo");
+
             } catch (error) {
                 console.log(error);
                 toast.error("Error occured..");

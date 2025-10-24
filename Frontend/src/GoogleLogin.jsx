@@ -1,11 +1,12 @@
 import { useGoogleLogin } from '@react-oauth/google'
-import React from 'react'
+import React, { useContext } from 'react'
 import { googleAuth } from './api'
 import { useNavigate } from 'react-router-dom';
 import { FcGoogle } from "react-icons/fc";
+import { ContextAPI } from './Context';
 const GoogleLogin = () => {
     const navigate = useNavigate();
-
+  const {setIsNgoAuthenticated}  = useContext(ContextAPI)
     const responseGoogle = async (authResult) => {
         try {
             if (authResult.code) {
@@ -16,7 +17,8 @@ const GoogleLogin = () => {
                 const { email, name, image } = result.data.user;
                   const obj = {email,name,image,token};
                   localStorage.setItem("user-info",JSON.stringify(obj));
-                 
+                  localStorage.removeItem("ngo-info");
+                  setIsNgoAuthenticated(false)
                   navigate("/volunteer")
                 // You can save in state or context
             } else {

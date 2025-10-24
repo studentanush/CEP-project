@@ -1,24 +1,18 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IoMdClose } from "react-icons/io";
-export default function Navbar({isAuthenticated,setIsAuthenticated}) {
+//import { ContextAPI } from "../Context";
+import { FaUser } from "react-icons/fa";
+import { ContextAPI } from "../Context";
+export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [userInfo, setUserInfo] = useState(null);
+  //const [userInfo, setUserInfo] = useState(null);
   const [showPopup, setShowPopup] = useState(false); // state for popup
+  const {userInfo,setUserInfo,ngoUserInfo,setNgoUserInfo,handleUserLogout,handleNgoLogout} = useContext(ContextAPI);
+ 
 
-  const handleLogout = () => {
-    localStorage.removeItem("user-info");
-    setUserInfo(null);
-    navigate("/login");
-  };
-
-  useEffect(() => {
-    const data = localStorage.getItem("user-info");
-    if (data) {
-      setUserInfo(JSON.parse(data));
-    }
-  }, [location,isAuthenticated,setIsAuthenticated]);
+  
 
   const links = [
     { to: "/", label: "Home" },
@@ -70,7 +64,35 @@ export default function Navbar({isAuthenticated,setIsAuthenticated}) {
                   
                   <p className="text-sm text-gray-300">{userInfo.email}</p>
                   <button
-                    onClick={handleLogout}
+                    onClick={handleUserLogout}
+                    className=" cursor-pointer mt-2 w-full bg-cyan-500 hover:bg-cyan-600 text-white py-1 rounded transition"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+          {ngoUserInfo && (
+              <div className="relative">
+                <FaUser
+                onClick={() => setShowPopup(!showPopup)} 
+                referrerPolicy="no-referrer"
+                className="w-6 h-6 rounded-full cursor-pointer"
+                alt="Profile"
+                />
+              
+
+              {showPopup && (
+                <div className="absolute right-0 mt-2 w-48 bg-gray-900 text-white rounded-lg shadow-lg p-4 z-50">
+                  <div className="flex items-center justify-between">
+                      <p className="font-semibold">{ngoUserInfo.name}</p>
+                      <IoMdClose onClick={()=>setShowPopup(false)} className="cursor-pointer" />
+                  </div>
+                  
+                  <p className="text-sm text-gray-300">{ngoUserInfo.email}</p>
+                  <button
+                    onClick={handleNgoLogout}
                     className=" cursor-pointer mt-2 w-full bg-cyan-500 hover:bg-cyan-600 text-white py-1 rounded transition"
                   >
                     Logout
