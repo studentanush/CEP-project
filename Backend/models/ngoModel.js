@@ -40,9 +40,43 @@ const ngoData = new Schema({
     postType:{
         type:String,
     },
+    status:{
+        type:String,
+    },
     ngoUserId:{type:mongoose.Types.ObjectId,ref:'ngoUsers',required:true},
    
 })
 
 export const ngoDataModel = mongoose.model("ngoData",ngoData);
+
+
+
+const appliedVolunteerData =  new Schema({
+    approve:{
+        type:String,
+    },
+    userId:{type:mongoose.Types.ObjectId,ref:'user',required:true},
+    ngoDataId:{type:mongoose.Types.ObjectId,ref:'ngoData',required:true},
+    ngoUserId:{type:mongoose.Types.ObjectId,ref:'ngoUsers',required:true}
+})
+export const appliedVolunteerDataModel = mongoose.model("appliedUserdata",appliedVolunteerData);
+
+
+
+
+const feedbackSchema = new Schema({
+    feedback:{
+        type:String,
+    },
+    rating:{
+        type:String,
+    },
+    date:{
+        type:String,
+    },
+    userId:{type:mongoose.Types.ObjectId,ref:'user',required:true},
+    ngoUserId:{type:mongoose.Types.ObjectId,ref:'ngoUsers',required:true}
+})
+
+export const feedbackModel = mongoose.model("feedback",feedbackSchema);
 

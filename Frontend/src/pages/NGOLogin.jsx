@@ -61,6 +61,7 @@ const NGOLogin = () => {
                     
                 }
                 localStorage.setItem("ngo-info",JSON.stringify(ngodetails));
+                console.log(ngodetails.token)
                 localStorage.removeItem("user-info");
                 setIsUserAuthenticated(false);
 

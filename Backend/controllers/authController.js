@@ -36,7 +36,7 @@ console.log("Google Client ID:", process.env.GOOGLE_CLIENT_ID);
         // Create JWT token
         const token = jwt.sign(
             { _id: user._id, email },
-            process.env.JWT_SECRET,
+            process.env.JWT_SECRET_VOL,
             { expiresIn: process.env.JWT_TIMEOUT }
         );
 

@@ -1,199 +1,298 @@
-import { useEffect, useState } from "react";
-import OpportunityCard from "../components/OpportunityCard";
-import { useLocation } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import VolunteerSidebar from "../components/VolunteerSidebar";
+import { FaSearch, FaMapMarkerAlt, FaTag, FaArrowLeft } from "react-icons/fa";
+import axios from "axios";
+import { BACKEND_URL } from "../config";
+import { toast } from "react-toastify";
 
-/**
- * VolunteerPage.jsx - Dark theme
- * Requires Tailwind CSS. Uses animate-fadeIn / animate-scaleIn (CSS provided below).
- */
-
-export default function VolunteerPage() {
-  const location = useLocation();
-  const initial = [
-    { title: "Teach English to Kids", ngo: "Hope Foundation", location: "Mumbai", date: "2025-09-12", description: "2-hour weekend classes for children.", tags: ["education"] },
-    { title: "Beach Cleanup Drive", ngo: "Green Earth NGO", location: "Chennai", date: "2025-09-15", description: "Help clean the coastline. Gloves provided.", tags: ["environment","cleanup"] },
-    { title: "Tree Plantation", ngo: "Eco Warriors", location: "Pune", date: "2025-09-20", description: "Plant trees in the community park.", tags: ["environment","trees"] },
-  ];
-  const [userInfo,setUserInfo] = useState(null);
-  const [opportunities, setOpportunities] = useState([]);
+const VolunteerPage = () => {
   const [search, setSearch] = useState("");
-  const [tab, setTab] = useState("all"); // all | upcoming | past
-  const [locationFilter, setLocationFilter] = useState("");
-  const [sortBy, setSortBy] = useState("date"); // date | title
-  const [applied, setApplied] = useState([]); // {oppIndex, name, email, note, appliedAt}
-  const [toast, setToast] = useState({ show: false, msg: "" });
-
-  useEffect(() => setOpportunities(initial), []);
-  useEffect(() => {
-    const data = localStorage.getItem("user-info");
-    if (data) {
-      setUserInfo(JSON.parse(data));
+  const [type, setType] = useState("");
+  const [location, setLocation] = useState("");
+  const [posts, setPosts] = useState([]);
+  const [view, setView] = useState(false);
+  const [viewDetails, setViewDetails] = useState([]);
+  const [vCount, setVCount] = useState(0);
+  const applyReq = async (id) => {
+    try {
+      const userInfo = JSON.parse(localStorage.getItem("user-info"));
+      const token = userInfo?.token;
+      const response = await axios.post(BACKEND_URL + "/ngo/apply", {
+        ngoDataId: id,
+        ngoUserId: viewDetails.ngoUserId._id,
+        apply: "y"
+      }, {
+        headers: {
+          Authorization: token
+        }
+      })
+      console.log("applied successfully")
+      toast.success("Applied successfully..🥳")
+    } catch (error) {
+      console.log(error);
     }
-  }, [location]);
+  }
+  const viewData = async (id) => {
+    setView(true)
+    try {
+      const res = await axios.get(BACKEND_URL + "/ngo/posts");
+      const posts = res.data.posts;
+      const post = posts.find(p => p._id === id);
+      console.log(post);
+      setViewDetails(post)
+      //const res1 = await axios.get(BACKEND_URL + "/ngo/")
+      const res1 = await axios.get(BACKEND_URL + "/ngo/applyUsers", {
+        params: {
+          ngoDataId: id,
+        }
 
-  const showToast = (msg) => {
-    setToast({ show: true, msg });
-    setTimeout(() => setToast({ show: false, msg: "" }), 2400);
-  };
+      })
+      console.log("hereh is")
+      const users = res1?.data?.res2 || [];
+      console.log(res1);
+      setVCount(users.length);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  const data = async () => {
 
-  const handleApply = (oppIndex, applicant) => {
-    setApplied((s) => [{ oppIndex, ...applicant, appliedAt: new Date().toISOString() }, ...s]);
-    showToast("Application submitted — thanks!");
-  };
+    try {
+      const response = await axios.get(BACKEND_URL + "/ngo/posts");
+      const posts = response?.data?.posts || [];
+      setPosts(posts);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
-  const filtered = opportunities
-    .map((opp, idx) => ({ ...opp, __idx: idx }))
-    .filter((opp) => {
-      const q = search.trim().toLowerCase();
-      if (!q) return true;
-      return (
-        (opp.title || "").toLowerCase().includes(q) ||
-        (opp.ngo || "").toLowerCase().includes(q) ||
-        (opp.location || "").toLowerCase().includes(q) ||
-        (opp.tags || []).some((t) => t.toLowerCase().includes(q))
-      );
-    })
-    .filter((opp) => (locationFilter ? opp.location === locationFilter : true))
-    .filter((opp) => {
-      if (tab === "all") return true;
-      if (!opp.date) return tab === "all";
-      const today = startOfDay(new Date());
-      const d = startOfDay(new Date(opp.date + "T00:00:00"));
-      if (tab === "upcoming") return d >= today;
-      if (tab === "past") return d < today;
-      return true;
-    })
-    .sort((a, b) => {
-      if (sortBy === "date") {
-        if (a.date && b.date) return new Date(a.date) - new Date(b.date);
-        if (a.date) return -1;
-        if (b.date) return 1;
-        return 0;
-      }
-      if (sortBy === "title") return (a.title || "").localeCompare(b.title || "");
-      return 0;
-    });
+  useEffect(() => {
+    data();
+  }, [])
+  const postTypes = [
+    "Education & Teaching",
+    "Environment & Sustainability",
+    "Animal Welfare",
+    "Health & Hygiene",
+    "Community Development",
+    "Elderly Care",
+    "Child Welfare",
+    "Disaster Relief & Emergency Services",
+    "Arts & Culture",
+    "Fundraising & Campaigns",
+    "Technology for Good",
+    "Human Rights & Legal Aid",
+    "Sports & Fitness Initiatives",
+    "Mental Health & Counselling",
+    "Special Needs Support",
+  ];
 
-  const locations = Array.from(new Set(opportunities.map((o) => o.location).filter(Boolean)));
-  const appliedCountFor = (idx) => applied.filter((a) => a.oppIndex === idx).length;
+  const cities = [
+    "Mumbai",
+    "Delhi",
+    "Bangalore",
+    "Hyderabad",
+    "Chennai",
+    "Pune",
+    "Kolkata",
+    "Ahmedabad",
+    "Jaipur",
+    "Surat",
+    "Lucknow",
+    "Indore",
+  ];
+
+  // Dummy Data
+
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-slate-900 text-white">
-      <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* LEFT: Sidebar */}
-        
-        <aside className="space-y-6 lg:sticky lg:top-20">
-          <div className="bg-gray-900 rounded-2xl p-6 shadow-[0_8px_30px_rgba(2,6,23,0.6)] border border-gray-800">
-            <h1 className="text-2xl  text-cyan-300 font-extrabold mb-2">😃Welcome {userInfo?.name}... </h1>
-            <h2 className="text-xl font-semibold text-cyan-300">Volunteer Opportunities</h2>
-            <p className="mt-2 text-sm text-gray-300">Discover ways to help — search and apply in seconds.</p>
+    <div className="flex">
+      <VolunteerSidebar />
+      {view ? (
+        <div className=" overflow-y-auto h-screen w-full bg-gradient-to-br from-gray-900 via-gray-850 to-gray-800 text-white p-10 rounded-2xl shadow-xl border border-gray-700">
 
-            <div className="mt-6 grid grid-cols-3 gap-3">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-cyan-300">{opportunities.length}</div>
-                <div className="text-xs text-gray-400">Total</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-rose-400">{opportunities.filter(o => o.date && new Date(o.date+"T00:00:00") >= startOfDay(new Date())).length}</div>
-                <div className="text-xs text-gray-400">Upcoming</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-emerald-400">{applied.length}</div>
-                <div className="text-xs text-gray-400">Applications</div>
-              </div>
-            </div>
+          <div className="flex items-center mb-6">
+            <button
+              onClick={() => setView(false)}
+              className="flex items-center gap-2 text-gray-300 hover:text-blue-400 transition-all duration-200"
+            >
+              <FaArrowLeft className="text-xl" />
+              <span className="text-lg font-medium">Back</span>
+            </button>
           </div>
+          {/* NGO Name */}
 
-          <div className="bg-gray-900 rounded-2xl p-5 shadow-[0_8px_30px_rgba(2,6,23,0.5)] border border-gray-800">
-            <h3 className="text-sm font-medium text-gray-200">Filters</h3>
-            <div className="mt-3 space-y-3">
-              <label className="block text-xs text-gray-400">Location</label>
-              <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)} className="w-full rounded-md border border-gray-700 px-3 py-2 text-sm bg-gray-800 text-white focus:ring-2 focus:ring-cyan-400">
-                <option value="">All locations</option>
-                {locations.map((loc) => <option key={loc} value={loc}>{loc}</option>)}
+          <h2 className="text-3xl font-bold mb-6 text-blue-400 tracking-tight">
+            {viewDetails?.ngoUserId?.name || "NGO Name"}
+          </h2>
+
+          {/* Title */}
+          <h3 className="text-2xl font-semibold mb-4 text-gray-100">
+            {viewDetails?.title || "Post Title"}
+          </h3>
+
+          {/* Description */}
+          <p className="text-gray-300 text-lg leading-relaxed mb-8 border-l-4 border-blue-500 pl-4 whitespace-pre-line">
+            {viewDetails?.desc || "No description provided."}
+          </p>
+
+          <h2 className=" mb-2 flex items-center gap-3 text-xl font-semibold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent m-2">
+            👥 Applied Volunteers: <span className="text-gray-100">{vCount}</span>
+          </h2>
+
+          {/* Grid for details */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <div className="bg-gray-800/70 p-5 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-400">📍 Location</p>
+              <p className="text-lg font-medium">{viewDetails?.location || "—"}</p>
+            </div>
+
+            <div className="bg-gray-800/70 p-5 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-400">📅 Start Date</p>
+              <p className="text-lg font-medium">
+                {viewDetails?.startDate
+                  ? new Date(viewDetails.startDate).toLocaleDateString("en-IN", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })
+                  : "—"}
+              </p>
+            </div>
+
+            <div className="bg-gray-800/70 p-5 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-400">📅 End Date</p>
+              <p className="text-lg font-medium">
+                {viewDetails?.endDate
+                  ? new Date(viewDetails.endDate).toLocaleDateString("en-IN", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })
+                  : "—"}
+              </p>
+            </div>
+
+            <div className="bg-gray-800/70 p-5 rounded-xl border border-gray-700 sm:col-span-2 lg:col-span-3">
+              <p className="text-sm text-gray-400">🎯 Post Type</p>
+              <p className="text-lg font-medium text-blue-400">
+                {viewDetails?.postType || "—"}
+              </p>
+            </div>
+           
+
+          </div>
+           <div className="flex justify-end w-100%">
+              <button
+                onClick={() => applyReq(viewDetails._id)}
+                className=" cursor-pointer px-5 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg shadow-md hover:from-blue-600 hover:to-indigo-700 transition-all duration-300"
+              >
+                Apply
+              </button>
+            </div>
+        </div>
+      ) : (
+        <div className="flex-1 bg-black min-h-screen text-white p-8 overflow-y-auto">
+          {/* Header Section */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+            {/* Search Bar */}
+            <div className="flex items-center bg-gray-900 border border-gray-700 rounded-xl px-4 py-2 w-full sm:w-1/2">
+              <FaSearch className="text-gray-400 mr-3" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search opportunities..."
+                className="bg-transparent outline-none text-gray-200 flex-1"
+              />
+            </div>
+
+            {/* Filters */}
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              {/* Type Filter */}
+              <select
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+                className="bg-gray-900 border border-gray-700 text-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500"
+              >
+                <option value="">Filter by Type</option>
+                {postTypes.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
               </select>
 
-              <label className="block text-xs text-gray-400">Status</label>
-              <div className="flex gap-2">
-                <button onClick={() => setTab("all")} className={`flex-1 text-sm py-2 rounded-md ${tab === "all" ? "bg-cyan-500 text-black" : "bg-gray-800 text-gray-300"}`}>All</button>
-                <button onClick={() => setTab("upcoming")} className={`flex-1 text-sm py-2 rounded-md ${tab === "upcoming" ? "bg-cyan-500 text-black" : "bg-gray-800 text-gray-300"}`}>Upcoming</button>
-                <button onClick={() => setTab("past")} className={`flex-1 text-sm py-2 rounded-md ${tab === "past" ? "bg-cyan-500 text-black" : "bg-gray-800 text-gray-300"}`}>Past</button>
-              </div>
-            </div>
-          </div>
-
-          <div className="hidden lg:block bg-gray-900 rounded-2xl p-5 shadow-[0_8px_30px_rgba(2,6,23,0.5)] border border-gray-800">
-            <h4 className="text-xs text-gray-400">Tips</h4>
-            <ul className="mt-2 text-sm text-gray-300 space-y-2">
-              <li>Sort by date to plan your schedule.</li>
-              <li>Filter by location to find nearby opportunities.</li>
-              <li>Use tags in search to find specific causes.</li>
-            </ul>
-          </div>
-        </aside>
-
-        {/* RIGHT: Main content */}
-        <main className="lg:col-span-2">
-          {/* Search + sort */}
-          <div className="bg-gray-900 p-4 rounded-xl shadow mb-6 border border-gray-800">
-            <div className="flex flex-col md:flex-row md:items-center gap-4">
-              <div className="flex-1">
-                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search title / NGO / location / tags..." className="w-full rounded-lg px-4 py-3 bg-gray-800 text-white border border-gray-700 focus:ring-2 focus:ring-cyan-400" />
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="text-sm text-gray-300">Sort:</div>
-                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="rounded-md border border-gray-700 px-3 py-2 text-sm bg-gray-800 text-white">
-                  <option value="date">Date</option>
-                  <option value="title">Title A–Z</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Opportunities list */}
-          <section>
-            {filtered.length === 0 ? (
-              <div className="bg-gray-900 p-10 rounded-xl shadow-[0_8px_30px_rgba(2,6,23,0.5)] text-center border border-gray-800">
-                <h3 className="text-lg font-semibold text-gray-200">No opportunities found</h3>
-                <p className="mt-2 text-sm text-gray-400">Try adjusting filters or check back later.</p>
-              </div>
-            ) : (
-              <ul className="grid gap-6">
-                {filtered.map((opp) => (
-                  <OpportunityCard
-                    key={opp.__idx}
-                    index={opp.__idx}
-                    title={opp.title}
-                    ngo={opp.ngo}
-                    location={opp.location}
-                    date={opp.date}
-                    description={opp.description}
-                    tags={opp.tags}
-                    onApply={(applicant) => handleApply(opp.__idx, applicant)}
-                    appliedCount={appliedCountFor(opp.__idx)}
-                    dark
-                  />
+              {/* Location Filter */}
+              <select
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="bg-gray-900 border border-gray-700 text-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500"
+              >
+                <option value="">Filter by Location</option>
+                {cities.map((city) => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
                 ))}
-              </ul>
-            )}
-          </section>
-        </main>
-      </div>
-
-      {/* TOAST */}
-      {toast.show && (
-        <div className="fixed right-6 bottom-6 z-50">
-          <div className="bg-gray-800 text-white px-4 py-3 rounded-lg shadow-lg border border-gray-700">
-            {toast.msg}
+              </select>
+            </div>
           </div>
+
+          {/* Posts Section */}
+          <div className="h-[calc(100vh-160px)] overflow-y-auto pr-2 space-y-6 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+            {posts.map((post, index) => (
+              <div
+                key={index}
+                className="bg-gradient-to-br from-gray-900 via-gray-850 to-gray-800 p-6 rounded-2xl border border-gray-700 shadow-md hover:shadow-lg transition-all duration-300"
+              >
+                <h2 className="text-xl font-semibold text-blue-400 mb-2">
+                  {post.ngoUserId.name}
+                </h2>
+                <h3 className="text-lg font-medium text-gray-100 mb-3">
+                  {post.title}
+                </h3>
+
+                <div className="flex flex-wrap items-center gap-4 text-gray-300 text-sm mb-3">
+                  <span className="flex items-center gap-1">
+                    <FaMapMarkerAlt className="text-blue-400" />
+                    {post.location}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    📅{" "}
+                    {new Date(post.startDate).toLocaleDateString("en-IN", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}{" "}
+                    -{" "}
+                    {new Date(post.endDate).toLocaleDateString("en-IN", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between mt-3">
+                  <div className="flex items-center gap-2 text-sm bg-blue-900/30 border border-blue-700 text-blue-400 px-3 py-1 rounded-full">
+                    <FaTag />
+                    {post.postType}
+                  </div>
+                  <button onClick={() => viewData(post._id)} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl transition-all duration-300">
+                    View Details
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
         </div>
       )}
+      {/* Main Content */}
+
     </div>
   );
-}
+};
 
-/* helpers */
-function startOfDay(d) {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-}
+export default VolunteerPage;

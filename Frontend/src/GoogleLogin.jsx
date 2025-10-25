@@ -10,10 +10,11 @@ const GoogleLogin = () => {
     const responseGoogle = async (authResult) => {
         try {
             if (authResult.code) {
+              console.log("here inside the authResult code")
                 const result = await googleAuth(authResult.code);
                 console.log("User from backend:", result.data.user);
                 const token = result.data.token;
-              
+              console.log(token);
                 const { email, name, image } = result.data.user;
                   const obj = {email,name,image,token};
                   localStorage.setItem("user-info",JSON.stringify(obj));

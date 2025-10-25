@@ -51,7 +51,7 @@ export default function Navbar() {
                 onClick={() => setShowPopup(!showPopup)}
                 referrerPolicy="no-referrer"
                 src={userInfo.image}
-                className="w-12 h-12 rounded-full cursor-pointer"
+                className="w-7 h-7 rounded-full cursor-pointer"
                 alt="Profile"
               />
 
