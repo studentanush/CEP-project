@@ -13,10 +13,29 @@ const VolunteerPage = () => {
   const [view, setView] = useState(false);
   const [viewDetails, setViewDetails] = useState([]);
   const [vCount, setVCount] = useState(0);
+
+
   const applyReq = async (id) => {
+
     try {
       const userInfo = JSON.parse(localStorage.getItem("user-info"));
       const token = userInfo?.token;
+      const checkres = await axios.get(BACKEND_URL + "/ngo/checkAppliers", {
+        headers: {
+          Authorization: token,
+        },
+        params: {
+          ngoDataId: id,
+        },
+      });
+
+      const result = checkres?.data.res.find((p)=>p.apply==="y");
+      if(result){
+        toast.warning("Applied already");
+        return;
+      }
+      console.log(checkres?.data);
+
       const response = await axios.post(BACKEND_URL + "/ngo/apply", {
         ngoDataId: id,
         ngoUserId: viewDetails.ngoUserId._id,
@@ -179,17 +198,17 @@ const VolunteerPage = () => {
                 {viewDetails?.postType || "—"}
               </p>
             </div>
-           
+
 
           </div>
-           <div className="flex justify-end w-100%">
-              <button
-                onClick={() => applyReq(viewDetails._id)}
-                className=" cursor-pointer px-5 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg shadow-md hover:from-blue-600 hover:to-indigo-700 transition-all duration-300"
-              >
-                Apply
-              </button>
-            </div>
+          <div className="flex justify-end w-100%">
+            <button
+              onClick={() => applyReq(viewDetails._id)}
+              className=" cursor-pointer px-5 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg shadow-md hover:from-blue-600 hover:to-indigo-700 transition-all duration-300"
+            >
+              Apply
+            </button>
+          </div>
         </div>
       ) : (
         <div className="flex-1 bg-black min-h-screen text-white p-8 overflow-y-auto">

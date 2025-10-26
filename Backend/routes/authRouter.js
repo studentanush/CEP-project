@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import { ngoUserMiddleware } from "../middlewares/ngoUserMiddleware.js";
 import bcrypt from "bcrypt";
 import { volunteerMiddleware } from "../middlewares/volunteerMiddleware.js";
+import mongoose from "mongoose";
 export const router = Router();
 router.get("/google", googleLogin);
 
@@ -118,7 +119,7 @@ ngoRouter.post("/post", ngoUserMiddleware, async (req, res) => {
 })
 ngoRouter.get("/posts", async (req, res) => {
     try {
-        const response = await ngoDataModel.find({}).populate("ngoUserId","name");
+        const response = await ngoDataModel.find({}).populate("ngoUserId", "name");
 
         res.json({
             posts: response,
@@ -146,7 +147,7 @@ ngoRouter.get("/myposts", ngoUserMiddleware, async (req, res) => {
     }
 })
 ngoRouter.delete("/myposts", async (req, res) => {
-    const id = req.body.id;
+    const id = req.query.id;
 
 
     await ngoDataModel.deleteOne({
@@ -158,6 +159,10 @@ ngoRouter.delete("/myposts", async (req, res) => {
     })
 })
 
+
+ngoRouter.put("/myposts",async(req,res)=>{
+    
+})
 ngoRouter.post("/feedback", volunteerMiddleware, async (req, res) => {
     const feedback = req.body.feedback;
     const rating = req.body.rating;
@@ -188,7 +193,7 @@ ngoRouter.get("/feedback", ngoUserMiddleware, async (req, res) => {
         const response = await feedbackModel.find({
             ngoUserId: req.ngoUserId,
         }).populate("userId", "name email")
-        console.log(response.feedback);  
+        console.log(response.feedback);
         res.json({
             message: response,
         })
@@ -204,13 +209,14 @@ ngoRouter.post("/apply", volunteerMiddleware, async (req, res) => {
     const ngoDataId = req.body.ngoDataId;
     const ngoUserId = req.body.ngoUserId;
     const apply = req.body.apply;
+    console.log("post "+ ngoDataId);
     try {
         await appliedVolunteerDataModel.create({
             approve: approve,
             ngoDataId: ngoDataId,
             userId: req.userId,
-            ngoUserId:ngoUserId,
-            apply:apply,
+            ngoUserId: ngoUserId,
+            apply: apply,
         })
         res.json({
             message: "Applied successfully.."
@@ -224,38 +230,60 @@ ngoRouter.post("/apply", volunteerMiddleware, async (req, res) => {
 ngoRouter.get("/appliedUsers", ngoUserMiddleware, async (req, res) => {
     try {
         const res1 = await appliedVolunteerDataModel.find({
-                ngoUserId:req.ngoUserId,
+            ngoUserId: req.ngoUserId,
         })
-       
+
 
         res.json({
-            res1:res1,
-            
+            res1: res1,
+
         })
 
 
     } catch (error) {
         console.log(error);
         res.json({
-            error:error,
+            error: error,
         })
     }
 })
-ngoRouter.get("/applyUsers",async(req,res)=>{
+ngoRouter.get("/applyUsers", async (req, res) => {
     try {
+
         const ngoDataId = req.query.ngoDataId;
         const res2 = await appliedVolunteerDataModel.find({
-            ngoDataId:ngoDataId,
+            ngoDataId: ngoDataId,
         }).populate("userId", "name email");
         res.json({
-            res2:res2,
+            res2: res2,
         })
 
     } catch (error) {
         console.log(error)
         res.json({
-            error:error,
+            error: error,
         })
     }
 })
+ngoRouter.get("/checkAppliers", volunteerMiddleware, async (req, res) => {
+    try {
+
+        const ngoDataId = req.query.ngoDataId;
+        console.log("get "+ngoDataId)
+        const response = await appliedVolunteerDataModel.find({
+            ngoDataId: (ngoDataId),
+            //userId: (req.userId),
+        });
+        console.log(response)
+        res.json({
+            res: response,
+        })
+    } catch (error) {
+        console.log(error);
+        res.json({
+            error: error
+        })
+    }
+})
+
 //  TODO : update post route 

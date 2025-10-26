@@ -5,6 +5,7 @@ import axios from "axios";
 import { BACKEND_URL } from "../config";
 import { FaArrowLeft } from "react-icons/fa";
 import { FaUserCircle, FaEnvelope } from "react-icons/fa";
+import { toast } from "react-toastify";
 const MyPosts = () => {
     const [filter, setFilter] = useState("all");
     const [posts, setPosts] = useState([]);
@@ -12,6 +13,22 @@ const MyPosts = () => {
     const [viewDetails, setViewDetails] = useState([]);
     const [vCount, setVCount] = useState(0);
     const [users, setUsers] = useState([]);
+    const [showPopup, setShowPopup] = useState(false);
+
+
+    const deleteReq = async (id) => {
+       // setShowPopup(true);
+        try {
+            await axios.delete(BACKEND_URL + "/ngo/myposts", {
+                params: { id },
+            });
+            console.log("Deleted successfully..");
+            toast.success("Deleted successfully..")
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     const viewData = async (id) => {
         setView(true)
         try {
@@ -20,24 +37,22 @@ const MyPosts = () => {
             const post = posts.find(p => p._id === id);
             console.log(post);
             setViewDetails(post)
-
             const res1 = await axios.get(BACKEND_URL + "/ngo/applyUsers", {
                 params: {
                     ngoDataId: id,
                 }
-
             })
             console.log("hereh is")
             const users = res1?.data?.res2 || [];
             console.log(res1);
             setVCount(users.length);
             setUsers(users);
-
-
         } catch (error) {
             console.log(error);
         }
     }
+
+
     const data1 = async () => {
         try {
             const ngoInfo = JSON.parse(localStorage.getItem("ngo-info"));
@@ -48,19 +63,14 @@ const MyPosts = () => {
                     Authorization: `${token}`, // <-- Include "Bearer " prefix,
                 }
             })
-
-
             const posts = mypostsRes?.data?.posts || [];
-
             console.log(posts);
-
             setPosts(posts);
-
-
         } catch (error) {
             console.log(error);
-
         }
+
+
     }
     // const data2 = async ({ id }) => {
     //     try {
@@ -105,8 +115,42 @@ const MyPosts = () => {
         });
     };
     return (
-        <div className="flex min-h-screen bg-gray-900">
+        <div className="flex min-h-screen bg-gray-900 relative">
             {/* Sidebar */}
+            {showPopup && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
+                    {/* Popup Box */}
+                    <div className="bg-gray-800 rounded-2xl p-8 w-full max-w-md shadow-xl relative">
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setShowPopup(false)}
+                            className=" cursor-pointer absolute top-3 right-3 text-gray-400 hover:text-white text-xl"
+                        >
+                            ✖
+                        </button>
+
+                        {/* Popup Content */}
+                        <h2 className="text-2xl font-semibold mb-4 text-blue-400">
+                            Confirmation
+                        </h2>
+                        <p className="text-gray-300 mb-6">
+                            Are you sure you want to delete this post? This action cannot be undone.
+                        </p>
+
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setShowPopup(false)}
+                                className="cursor-pointer px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg"
+                            >
+                                Cancel
+                            </button>
+                            <button onClick={() => deleteReq(post._id)} className="cursor-pointer px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             <NgoSidebar />
             {view ? (
                 <div className=" overflow-y-auto h-screen w-full bg-gradient-to-br from-gray-900 via-gray-850 to-gray-800 text-white p-10 rounded-2xl shadow-xl border border-gray-700">
@@ -136,8 +180,8 @@ const MyPosts = () => {
                         {viewDetails?.desc || "No description provided."}
                     </p>
                     <h2 className=" mb-2 flex items-center gap-3 text-xl font-semibold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent m-2">
-  👥 Applied Volunteers: <span className="text-gray-100">{vCount}</span>
-</h2>
+                        👥 Applied Volunteers: <span className="text-gray-100">{vCount}</span>
+                    </h2>
 
 
                     {/* Grid for details */}
@@ -285,10 +329,10 @@ const MyPosts = () => {
                                         <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-xl text-sm font-medium transition-all">
                                             <FaEdit /> Edit
                                         </button>
-                                        <button onClick={() => viewData(post._id)} className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-xl text-sm font-medium transition-all">
+                                        <button onClick={() => viewData(post._id)} className=" cursor-pointer flex items-center gap-2 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-xl text-sm font-medium transition-all">
                                             View
                                         </button>
-                                        <button className="flex items-center gap-2 bg-red-600 hover:bg-red-500 px-4 py-2 rounded-xl text-sm font-medium transition-all">
+                                        <button onClick={()=>setShowPopup(true)} className=" cursor-pointer flex items-center gap-2 bg-red-600 hover:bg-red-500 px-4 py-2 rounded-xl text-sm font-medium transition-all">
                                             <FaTrash /> Delete
                                         </button>
                                     </div>

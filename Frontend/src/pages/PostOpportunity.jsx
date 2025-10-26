@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import NgoSidebar from "../components/NgoSidebar";
 import axios from "axios";
 import { BACKEND_URL } from "../config";
+import { toast } from "react-toastify";
 
 const PostOpportunity = () => {
     const [formData, setFormData] = useState({
@@ -60,6 +61,7 @@ const PostOpportunity = () => {
                     },
                 }
             );
+            toast.success("Post created succesfully..!")
 
             setFormData({
                 title: "",
