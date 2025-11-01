@@ -7,75 +7,87 @@ import { BACKEND_URL } from "../config";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { ContextAPI } from "../Context";
+import animationData1 from "../assets/Loading.json";
 const NGOLogin = () => {
-    const[name,setName] = useState("");
-    const[email,setEmail] = useState("");
-    const[password,setPassword] = useState("");
-    const[number,setNumber] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [number, setNumber] = useState("");
   const [isSignup, setIsSignup] = useState(false);
-  const {setIsUserAuthenticated} = useContext(ContextAPI);
+  const { setIsUserAuthenticated, loading, setLoading } = useContext(ContextAPI);
   const navigate = useNavigate();
-    const onSubmitHandler = async(e)=>{
-        e.preventDefault();
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
 
-        if(isSignup){
-            // signup
-            try {
-                const response = await axios.post(BACKEND_URL + "/ngo/signup",{
-                    name:name,
-                    email:email,
-                    password:password,
-                    number:number,
-                })
-                setName("");
-                setEmail("");
-                setPassword("");
-                setNumber("");
-                console.log(response);
-                toast.success(response.data.message + "sigin now!");
-                
-            } catch (error) {
-                console.log(error);
-                toast.error("Error Occured..");
-                
-            }
-            
-        }else{
-            // signin
-            try {
-                const response = await axios.post(BACKEND_URL + "/ngo/signin",{
-                    email:email,
-                    password:password
-                })
-                console.log(response);
-                toast.success(response.data.message);
-                setEmail("");
-                setPassword("");
-                const token = response.data.token;
-                const name = response.data.user.name;
-                const emaiL = response.data.user.email;
-                const ngodetails = {
-                    token:token,
-                    name:name,
-                    email:emaiL,
-                    
-                }
-                localStorage.setItem("ngo-info",JSON.stringify(ngodetails));
-                console.log(ngodetails.token)
-                localStorage.removeItem("user-info");
-                setIsUserAuthenticated(false);
+    if (isSignup) {
+      // signup
+      try {
+        const response = await axios.post(BACKEND_URL + "/ngo/signup", {
+          name: name,
+          email: email,
+          password: password,
+          number: number,
+        })
+        setName("");
+        setEmail("");
+        setPassword("");
+        setNumber("");
+        console.log(response);
+        toast.success(response.data.message + "sigin now!");
 
-                navigate("/ngo");
+      } catch (error) {
+        console.log(error);
+        toast.error("Error Occured..");
 
-            } catch (error) {
-                console.log(error);
-                toast.error("Error occured..");
-            }
+      }
+
+    } else {
+      // signin
+      setLoading(true);
+      try {
+        const response = await axios.post(BACKEND_URL + "/ngo/signin", {
+          email: email,
+          password: password
+        })
+        console.log(response);
+        toast.success(response.data.message);
+        setEmail("");
+        setPassword("");
+        const token = response.data.token;
+        const name = response.data.user.name;
+        const emaiL = response.data.user.email;
+        const ngodetails = {
+          token: token,
+          name: name,
+          email: emaiL,
+
         }
+        localStorage.setItem("ngo-info", JSON.stringify(ngodetails));
+        console.log(ngodetails.token)
+        localStorage.removeItem("user-info");
+        setIsUserAuthenticated(false);
+        setLoading(false);
+
+        navigate("/ngo");
+
+      } catch (error) {
+        console.log(error);
+        toast.error("Error occured..");
+      }
     }
+  }
   return (
     <div className="h-screen flex items-center justify-between bg-gray-950 text-white p-8">
       {/* Left Animation Section */}
+      {loading && (
+        <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-black/20 z-50">
+          <Lottie
+            animationData={animationData1}
+            loop={true}
+            style={{ height: 150, width: 150 }}
+          />
+        </div>
+      )}
       <div className="ml-10 hidden md:block">
         <Lottie
           animationData={animationData}
@@ -97,10 +109,10 @@ const NGOLogin = () => {
             <div className="flex items-center border border-gray-700 rounded-lg px-3 py-2 bg-gray-800 focus-within:border-indigo-500">
               <FaUser className="text-gray-400 mr-3" />
               <input
-                onChange={(e)=>setName(e.target.value)}
-                value = {name}
+                onChange={(e) => setName(e.target.value)}
+                value={name}
                 type="text"
-                placeholder="Full Name"
+                placeholder="NGO Name"
                 className="bg-transparent focus:outline-none flex-1 text-gray-200"
               />
             </div>
@@ -109,8 +121,8 @@ const NGOLogin = () => {
           <div className="flex items-center border border-gray-700 rounded-lg px-3 py-2 bg-gray-800 focus-within:border-indigo-500">
             <FaEnvelope className="text-gray-400 mr-3" />
             <input
-                onChange={(e)=>setEmail(e.target.value)}
-                value = {email}
+              onChange={(e) => setEmail(e.target.value)}
+              value={email}
               type="email"
               placeholder="Email"
               className="bg-transparent focus:outline-none flex-1 text-gray-200"
@@ -120,8 +132,8 @@ const NGOLogin = () => {
           <div className="flex items-center border border-gray-700 rounded-lg px-3 py-2 bg-gray-800 focus-within:border-indigo-500">
             <FaLock className="text-gray-400 mr-3" />
             <input
-            onChange={(e)=>setPassword(e.target.value)}
-                value = {password}
+              onChange={(e) => setPassword(e.target.value)}
+              value={password}
               type="password"
               placeholder="Password"
               className="bg-transparent focus:outline-none flex-1 text-gray-200"
@@ -132,8 +144,8 @@ const NGOLogin = () => {
             <div className="flex items-center border border-gray-700 rounded-lg px-3 py-2 bg-gray-800 focus-within:border-indigo-500">
               <FaPhone className="text-gray-400 mr-3" />
               <input
-                 onChange={(e)=>setNumber(e.target.value)}
-                value = {number}
+                onChange={(e) => setNumber(e.target.value)}
+                value={number}
                 type="tel"
                 placeholder="Phone Number"
                 className="bg-transparent focus:outline-none flex-1 text-gray-200"
@@ -142,7 +154,7 @@ const NGOLogin = () => {
           )}
 
           <button
-         
+
             type="submit"
             className="w-full bg-indigo-600 hover:bg-indigo-700 transition-all duration-300 text-white py-2 rounded-lg font-semibold mt-3"
           >
@@ -178,5 +190,5 @@ const NGOLogin = () => {
     </div>
   );
 };
- 
+
 export default NGOLogin;

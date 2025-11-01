@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 export const ContextAPI = createContext();
 const Context = (props) => {
+  const [loading,setLoading] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
   const [ngoUserInfo, setNgoUserInfo] = useState(null);
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
@@ -66,6 +67,8 @@ const Context = (props) => {
            setIsNgoAuthenticated,
            handleNgoLogout,
            handleUserLogout,
+           loading,
+           setLoading,
 
         }}>
            {props.children}

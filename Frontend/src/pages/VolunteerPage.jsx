@@ -29,17 +29,18 @@ const VolunteerPage = () => {
         },
       });
 
-      const result = checkres?.data.res.find((p)=>p.apply==="y");
-      if(result){
+      const result = checkres?.data.res.find((p) => p.apply === "y");
+      if (result) {
         toast.warning("Applied already");
         return;
       }
-      console.log(checkres?.data);
+      //console.log(checkres?.data);
 
       const response = await axios.post(BACKEND_URL + "/ngo/apply", {
         ngoDataId: id,
         ngoUserId: viewDetails.ngoUserId._id,
-        apply: "y"
+        apply: "y",
+        date: new Date().toISOString(),
       }, {
         headers: {
           Authorization: token
@@ -260,7 +261,13 @@ const VolunteerPage = () => {
 
           {/* Posts Section */}
           <div className="h-[calc(100vh-160px)] overflow-y-auto pr-2 space-y-6 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
-            {posts.map((post, index) => (
+            {posts.filter(post =>
+              (type === "" || post.postType === type) &&
+              (location === "" || post.location.toLowerCase().includes(location.toLowerCase())) &&
+              (search === "" ||
+                post.title.toLowerCase().includes(search.toLowerCase()) ||
+                post.desc.toLowerCase().includes(search.toLowerCase()))
+            ).map((post, index) => (
               <div
                 key={index}
                 className="bg-gradient-to-br from-gray-900 via-gray-850 to-gray-800 p-6 rounded-2xl border border-gray-700 shadow-md hover:shadow-lg transition-all duration-300"

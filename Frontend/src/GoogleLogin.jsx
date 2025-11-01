@@ -6,8 +6,9 @@ import { FcGoogle } from "react-icons/fc";
 import { ContextAPI } from './Context';
 const GoogleLogin = () => {
     const navigate = useNavigate();
-  const {setIsNgoAuthenticated}  = useContext(ContextAPI)
+  const {setIsNgoAuthenticated,setLoading}  = useContext(ContextAPI)
     const responseGoogle = async (authResult) => {
+      setLoading(true);
         try {
             if (authResult.code) {
               console.log("here inside the authResult code")
@@ -19,7 +20,8 @@ const GoogleLogin = () => {
                   const obj = {email,name,image,token};
                   localStorage.setItem("user-info",JSON.stringify(obj));
                   localStorage.removeItem("ngo-info");
-                  setIsNgoAuthenticated(false)
+                  setIsNgoAuthenticated(false);
+                  setLoading(false);
                   navigate("/volunteer")
                 // You can save in state or context
             } else {

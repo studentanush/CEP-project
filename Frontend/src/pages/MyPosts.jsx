@@ -14,16 +14,64 @@ const MyPosts = () => {
     const [vCount, setVCount] = useState(0);
     const [users, setUsers] = useState([]);
     const [showPopup, setShowPopup] = useState(false);
+    const [editPopup, setEditPopup] = useState(false);
+    const [deletePostId, setDeletePostId] = useState(null);
+const [showDeletePopup, setShowDeletePopup] = useState(false);
 
 
-    const deleteReq = async (id) => {
-       // setShowPopup(true);
+    const [updateDetails, setUpdateDetails] = useState({});
+
+    const updateGet = async (id) => {
+        setEditPopup(true);
         try {
-            await axios.delete(BACKEND_URL + "/ngo/myposts", {
-                params: { id },
-            });
-            console.log("Deleted successfully..");
-            toast.success("Deleted successfully..")
+            const response = await axios.get(BACKEND_URL + "/ngo/posts");
+            const posts = response.data.posts;
+            const post = posts.find(p => p._id === id);
+            console.log(post);
+            console.log("before update ; " + post);
+            setUpdateDetails(post);
+
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const updatePost = async () => {
+        console.log(updateDetails);
+        try {
+
+            await axios.put(BACKEND_URL + "/ngo/updatepost", {
+                id: updateDetails._id,
+                title: updateDetails.title,
+                desc: updateDetails.desc,
+                location: updateDetails.location,
+                startDate: updateDetails.startDate,
+                endDate: updateDetails.endDate,
+                status: updateDetails.status,
+                postType: updateDetails.postType
+            })
+            toast.success("updated successfully");
+            setEditPopup(false)
+
+        } catch (error) {
+            console.log(error);
+        }
+
+    }
+    const deleteReq = async (id) => {
+        //setShowPopup(true);
+        console.log(id)
+        try {
+            
+                await axios.delete(BACKEND_URL + "/ngo/myposts", {
+                    params: { id },
+                });
+                console.log("Deleted successfully..");
+                toast.success("Deleted successfully..");
+                setShowPopup(false);
+           
+
         } catch (error) {
             console.log(error);
         }
@@ -72,30 +120,25 @@ const MyPosts = () => {
 
 
     }
-    // const data2 = async ({ id }) => {
-    //     try {
-    //         const appliedUsers = await axios.get(
-    //             `${BACKEND_URL}/ngo/appliedUsers`,
-    //             {
-    //                 headers: {
-    //                     Authorization: `${token}`,
-    //                 },
-    //                 params: {
-    //                     ngoDataId: id,
-    //                 },
-    //             }
-    //         );
+    const postTypes = [
+        "Education & Teaching",
+        "Environment & Sustainability",
+        "Animal Welfare",
+        "Health & Hygiene",
+        "Community Development",
+        "Elderly Care",
+        "Child Welfare",
+        "Disaster Relief & Emergency Services",
+        "Arts & Culture",
+        "Fundraising & Campaigns",
+        "Technology for Good",
+        "Human Rights & Legal Aid",
+        "Sports & Fitness Initiatives",
+        "Mental Health & Counselling",
+        "Special Needs Support",
+    ];
+    const statuses = ["active", "completed"];
 
-    //         const volunteer = appliedUsers?.data?.res2 || [];
-    //         const applicants = volunteer.filter(v => v.approve === "n").length;
-    //         const joined = volunteer.filter(v => v.approve === "y").length;
-
-
-
-    //     } catch (error) {
-    //         console.error("Error fetching applied users:", error);
-    //     }
-    // };
 
     useEffect(() => {
 
@@ -114,9 +157,13 @@ const MyPosts = () => {
             year: "numeric",
         });
     };
+    const handleDeleteClick = (id) => {
+        setDeletePostId(id);
+        setShowPopup(true);
+    };
     return (
         <div className="flex min-h-screen bg-gray-900 relative">
-            {/* Sidebar */}
+
             {showPopup && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
                     {/* Popup Box */}
@@ -144,12 +191,136 @@ const MyPosts = () => {
                             >
                                 Cancel
                             </button>
-                            <button onClick={() => deleteReq(post._id)} className="cursor-pointer px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg">
+                            <button onClick={() => deleteReq(deletePostId)} className="cursor-pointer px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg">
                                 Delete
                             </button>
                         </div>
                     </div>
                 </div>
+            )}
+            {editPopup && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
+                    <div className="bg-gradient-to-br from-gray-900 via-gray-850 to-gray-800 text-white w-[90%] max-w-2xl p-8 rounded-2xl shadow-2xl border border-gray-700">
+                        {/* Header */}
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold text-blue-400">Edit Opportunity</h2>
+                            <button
+                                onClick={() => setEditPopup(false)}
+                                className="text-gray-400 hover:text-red-500 text-2xl font-bold"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        {/* Form */}
+                        <div className="space-y-5">
+                            <input
+                                type="text"
+                                placeholder="Title"
+                                value={updateDetails.title || ""}
+                                onChange={(e) =>
+                                    setUpdateDetails({ ...updateDetails, title: e.target.value })
+                                }
+                                className="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-blue-500"
+                            />
+
+                            <input
+                                type="text"
+                                placeholder="Location"
+                                value={updateDetails.location || ""}
+                                onChange={(e) =>
+                                    setUpdateDetails({ ...updateDetails, location: e.target.value })
+                                }
+                                className="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-blue-500"
+                            />
+
+                            <div className="flex gap-4">
+                                <div className="flex-1">
+                                    <label className="text-sm text-gray-400">Start Date</label>
+                                    <input
+                                        type="date"
+                                        value={updateDetails.startDate?.slice(0, 10) || ""}
+                                        onChange={(e) =>
+                                            setUpdateDetails({
+                                                ...updateDetails,
+                                                startDate: e.target.value,
+                                            })
+                                        }
+                                        className="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-blue-500"
+                                    />
+                                </div>
+
+                                <div className="flex-1">
+                                    <label className="text-sm text-gray-400">End Date</label>
+                                    <input
+                                        type="date"
+                                        value={updateDetails.endDate?.slice(0, 10) || ""}
+                                        onChange={(e) =>
+                                            setUpdateDetails({
+                                                ...updateDetails,
+                                                endDate: e.target.value,
+                                            })
+                                        }
+                                        className="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-blue-500"
+                                    />
+                                </div>
+                            </div>
+
+                            <textarea
+                                placeholder="Description"
+                                rows="4"
+                                value={updateDetails.desc || ""}
+                                onChange={(e) =>
+                                    setUpdateDetails({ ...updateDetails, desc: e.target.value })
+                                }
+                                className="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-blue-500"
+                            ></textarea>
+
+                            <div className="flex gap-4">
+                                <select
+                                    value={updateDetails.postType || ""}
+                                    onChange={(e) =>
+                                        setUpdateDetails({ ...updateDetails, postType: e.target.value })
+                                    }
+                                    className="flex-1 p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-blue-500"
+                                >
+                                    <option value="">Select Post Type</option>
+                                    {postTypes.map((type, index) => (
+                                        <option key={index} value={type}>
+                                            {type}
+                                        </option>
+                                    ))}
+                                </select>
+
+                                <select
+                                    value={updateDetails.status || ""}
+                                    onChange={(e) =>
+                                        setUpdateDetails({ ...updateDetails, status: e.target.value })
+                                    }
+                                    className="flex-1 p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-blue-500"
+                                >
+                                    <option value="">Select Status</option>
+                                    {statuses.map((s, index) => (
+                                        <option key={index} value={s}>
+                                            {s}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* Update Button */}
+                        <div className="mt-8 flex justify-end">
+                            <button
+                                onClick={() => updatePost()}
+                                className="bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-xl text-white font-semibold transition-all duration-300"
+                            >
+                                Update
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
             )}
             <NgoSidebar />
             {view ? (
@@ -293,50 +464,64 @@ const MyPosts = () => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8 pb-10">
                             {filteredPosts.map((post) => (
                                 <div
-                                    key={post.id}
-                                    className="bg-gray-800/80 backdrop-blur-md border border-gray-700 p-6 rounded-2xl shadow-lg hover:shadow-blue-500/20 transform hover:scale-[1.02] transition-all duration-300"
+                                    key={post._id}
+                                    className="bg-gray-900/70 backdrop-blur-lg border border-gray-700 p-6 rounded-2xl shadow-md hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 transform hover:scale-[1.01]"
                                 >
+                                    {/* Title & Status */}
                                     <div className="flex justify-between items-center mb-3">
-                                        <h2 className="text-xl font-semibold">{post.title}</h2>
+                                        <h2 className="text-xl font-semibold text-gray-100">{post.title}</h2>
                                         <span
-                                            className={`px-3 py-1 rounded-full text-sm font-medium ${post.status === "Active"
-                                                ? "bg-green-600/30 text-green-400"
-                                                : post.status === "Closed"
-                                                    ? "bg-red-600/30 text-red-400"
-                                                    : "bg-yellow-600/30 text-yellow-400"
+                                            className={`px-3 py-1 rounded-full text-xs font-medium ${post.status === "active"
+                                                ? "bg-emerald-600/20 text-emerald-400"
+                                                : post.status === "completed"
+                                                    ? "bg-blue-600/20 text-blue-400"
+                                                    : "bg-yellow-600/20 text-yellow-400"
                                                 }`}
                                         >
-                                            {post.status}
+                                            {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
                                         </span>
                                     </div>
 
+                                    {/* Dates */}
                                     <p className="text-gray-400 text-sm mb-4">
-                                        📅 {formatDate(post.startDate)} - {formatDate(post.endDate)}
+                                        📅 {formatDate(post.startDate)} → {formatDate(post.endDate)}
                                     </p>
 
-                                    {/* Analytics */}
-                                    <div className="flex justify-between items-center mb-6">
-                                        <div className="flex items-center gap-2 text-blue-400">
-                                            {/* <FaUsers /> {post.applicants} Applicants */}
+                                    {/* Optional analytics area */}
+                                    <div className="flex justify-between items-center mb-6 text-sm text-gray-400">
+                                        <div className="flex items-center gap-2">
+                                            {/* <FaUsers className="text-gray-500" /> {post.applicants || 0} Applicants */}
                                         </div>
-                                        <div className="flex items-center gap-2 text-green-400">
-                                            {/* <FaChartBar /> {post.joined} Joined */}
+                                        <div className="flex items-center gap-2">
+                                            {/* <FaChartBar className="text-gray-500" /> {post.joined || 0} Joined */}
                                         </div>
                                     </div>
 
                                     {/* Actions */}
                                     <div className="flex justify-between">
-                                        <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-xl text-sm font-medium transition-all">
-                                            <FaEdit /> Edit
+                                        <button
+                                            onClick={() => updateGet(post._id)}
+                                            className="flex items-center gap-2 bg-gray-700/70 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded-xl text-sm font-medium transition-all"
+                                        >
+                                            <FaEdit className="text-gray-300" /> Edit
                                         </button>
-                                        <button onClick={() => viewData(post._id)} className=" cursor-pointer flex items-center gap-2 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-xl text-sm font-medium transition-all">
-                                            View
+
+                                        <button
+                                            onClick={() => viewData(post._id)}
+                                            className="flex items-center gap-2 bg-gray-700/70 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded-xl text-sm font-medium transition-all"
+                                        >
+                                            View Details
                                         </button>
-                                        <button onClick={()=>setShowPopup(true)} className=" cursor-pointer flex items-center gap-2 bg-red-600 hover:bg-red-500 px-4 py-2 rounded-xl text-sm font-medium transition-all">
+
+                                        <button
+                                            onClick={() => handleDeleteClick(post._id)}
+                                            className="flex items-center gap-2 bg-gray-700/70 hover:bg-gray-600 text-red-400 px-4 py-2 rounded-xl text-sm font-medium transition-all"
+                                        >
                                             <FaTrash /> Delete
                                         </button>
                                     </div>
                                 </div>
+
                             ))}
                         </div>
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import NgoSidebar from "../components/NgoSidebar";
 import {
   PieChart,
@@ -17,6 +17,7 @@ import { BACKEND_URL } from "../config";
 
 const NGOPage = () => {
 
+  const [volunteers, setVolunteers] = useState([]);
 
   // 🧩 Dummy data (will be replaced by backend later)
   const [stats, setStats] = useState({
@@ -43,6 +44,8 @@ const NGOPage = () => {
       })
       const posts = mypostsRes?.data?.posts || [];
       const volunteer = appliedUsers?.data?.res1 || [];
+      console.log(volunteer)
+      setVolunteers(volunteer);
       const totalPosts = posts.length;
       const activeOpportunities = posts.filter(p => p.status === "active").length;
 
@@ -72,14 +75,29 @@ const NGOPage = () => {
     { name: "Completed", value: stats.completedOpportunities },
   ];
 
-  const volunteerData = [
-    { name: "Jan", volunteers: 20 },
-    { name: "Feb", volunteers: 30 },
-    { name: "Mar", volunteers: 25 },
-    { name: "Apr", volunteers: 15 },
-    { name: "May", volunteers: 18 },
-    { name: "Jun", volunteers: 12 },
-  ];
+  const volunteerData = useMemo(() => {
+    const months = [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    ];
+
+    // Initialize all months with 0
+    const monthCount = Array(12).fill(0);
+
+    volunteers.forEach((v) => {
+      if (v.date) {
+        const d = new Date(v.date);
+        const monthIndex = d.getMonth(); // 0–11
+        monthCount[monthIndex]++;
+      }
+    });
+
+    return months.map((m, i) => ({
+      name: m,
+      volunteers: monthCount[i],
+    }));
+  }, [volunteers]);
+  console.log(volunteerData);
 
   const COLORS = ["#60A5FA", "#34D399"];
 
@@ -138,16 +156,22 @@ const NGOPage = () => {
 
           {/* Bar Chart */}
           <div className="bg-gray-800/80 backdrop-blur-md border border-gray-700 p-8 rounded-2xl shadow-lg hover:shadow-cyan-500/20 transform hover:scale-[1.02] transition-all duration-300">
-            <h2 className="text-2xl font-semibold mb-5">Volunteers Joined (Last 6 Months)</h2>
+            <h2 className="text-2xl font-semibold mb-5">Volunteers Joined (Last 12 Months)</h2>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={volunteerData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#444" />
                 <XAxis dataKey="name" stroke="#aaa" />
-                <YAxis stroke="#aaa" />
+                <YAxis
+                  stroke="#aaa"
+                  allowDecimals={false}  // ✅ ensures only whole numbers
+                  domain={[0, 'auto']}   // ✅ starts from 0 and auto scales max
+                  tickCount={volunteerData.length + 1} // optional for finer spacing
+                />
                 <Tooltip />
                 <Bar dataKey="volunteers" fill="#60A5FA" radius={[10, 10, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
+
           </div>
         </div>
       </div>

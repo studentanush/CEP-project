@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import NgoSidebar from "../components/NgoSidebar";
-import { FaStar } from "react-icons/fa";
-import { FaUserCircle } from "react-icons/fa";
+// import { FaStar } from "react-icons/fa";
+// import { FaUserCircle } from "react-icons/fa";
 import axios from "axios";
 import { BACKEND_URL } from "../config";
+import Lottie from "lottie-react";
+import animationData from "../assets/UnderConstruction.json";
 
 const feedbackData = [
     {
@@ -58,11 +60,18 @@ const Feedbacks = () => {
     },[]);
     return (
         <div className="flex">
-            {/* Sidebar */}
+           
             <NgoSidebar />
-
-            {/* Main content */}
-            <div className="flex-1 text-white p-6 bg-black h-screen overflow-y-auto">
+            <div className="flex items-center justify-center h-203 w-full bg-black">
+                <Lottie
+          animationData={animationData}
+          loop={true}
+          style={{ height: 500, width: 700 }}
+        />
+            </div>
+            
+            
+            {/* <div className="flex-1 text-white p-6 bg-black h-screen overflow-y-auto">
                 <h1 className="text-3xl font-semibold mb-6 text-center">💬 Feedbacks</h1>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -95,11 +104,11 @@ const Feedbacks = () => {
                     ))}
                 </div>
 
-                {/* Scroll hint */}
+                
                 <p className="text-gray-500 text-sm text-center mt-6 italic">
                     Scroll down for more feedback ⬇️
                 </p>
-            </div>
+            </div> */}
         </div>
     );
 };

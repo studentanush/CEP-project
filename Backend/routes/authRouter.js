@@ -160,8 +160,35 @@ ngoRouter.delete("/myposts", async (req, res) => {
 })
 
 
-ngoRouter.put("/myposts",async(req,res)=>{
-    
+ngoRouter.put("/updatepost", async (req, res) => {
+    const id = req.body.id;
+    const title = req.body.title;
+    const desc = req.body.desc;
+    const startDate = req.body.startDate;
+    const endDate = req.body.endDate;
+    const location = req.body.location;
+    const postType = req.body.postType;
+    const status = req.body.status;
+
+    try {
+        await ngoDataModel.findByIdAndUpdate(id, {
+
+            title,
+            desc,
+            startDate,
+            endDate,
+            location,
+            postType,
+            status
+        },
+            { new: true } // optional: returns the updated document
+        )
+        res.json({
+            message: "Updated successfully.."
+        })
+    } catch (error) {
+        console.log(error);
+    }
 })
 ngoRouter.post("/feedback", volunteerMiddleware, async (req, res) => {
     const feedback = req.body.feedback;
@@ -209,7 +236,8 @@ ngoRouter.post("/apply", volunteerMiddleware, async (req, res) => {
     const ngoDataId = req.body.ngoDataId;
     const ngoUserId = req.body.ngoUserId;
     const apply = req.body.apply;
-    console.log("post "+ ngoDataId);
+    const date = req.body.date;
+    console.log("post " + ngoDataId);
     try {
         await appliedVolunteerDataModel.create({
             approve: approve,
@@ -217,6 +245,7 @@ ngoRouter.post("/apply", volunteerMiddleware, async (req, res) => {
             userId: req.userId,
             ngoUserId: ngoUserId,
             apply: apply,
+            date: date,
         })
         res.json({
             message: "Applied successfully.."
@@ -269,7 +298,7 @@ ngoRouter.get("/checkAppliers", volunteerMiddleware, async (req, res) => {
     try {
 
         const ngoDataId = req.query.ngoDataId;
-        console.log("get "+ngoDataId)
+        console.log("get " + ngoDataId)
         const response = await appliedVolunteerDataModel.find({
             ngoDataId: (ngoDataId),
             //userId: (req.userId),
@@ -284,6 +313,24 @@ ngoRouter.get("/checkAppliers", volunteerMiddleware, async (req, res) => {
             error: error
         })
     }
+})
+ngoRouter.get("/myvolunteering", volunteerMiddleware, async (req, res) => {
+    try {
+        const response = await appliedVolunteerDataModel.find({
+            userId: req.userId,
+            apply: "y"
+        }).populate("ngoDataId");
+
+        res.json({
+            posts:response,
+        })
+
+    } catch (error) {
+        res.json({
+            message:error,
+        })
+    }
+
 })
 
 //  TODO : update post route 

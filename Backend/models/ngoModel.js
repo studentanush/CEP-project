@@ -58,6 +58,9 @@ const appliedVolunteerData =  new Schema({
     apply:{
         type:String,
     },
+    date:{
+        type:Date,
+    },
     userId:{type:mongoose.Types.ObjectId,ref:'user',required:true},
     ngoDataId:{type:mongoose.Types.ObjectId,ref:'ngoData',required:true},
     ngoUserId:{type:mongoose.Types.ObjectId,ref:'ngoUsers',required:true}

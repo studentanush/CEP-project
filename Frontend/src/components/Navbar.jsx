@@ -4,6 +4,7 @@ import { IoMdClose } from "react-icons/io";
 //import { ContextAPI } from "../Context";
 import { FaUser } from "react-icons/fa";
 import { ContextAPI } from "../Context";
+import image from "../assets/logo.png"
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -25,8 +26,9 @@ export default function Navbar() {
       <div className="flex justify-between items-center">
         <Link
           to="/"
-          className="text-2xl font-extrabold text-cyan-400 tracking-wide pl-8"
+          className="text-3xl font-extrabold text-cyan-400 tracking-wide pl-8 flex items-center font-serif"
         >
+          <img src={image} className="w-25 h-15 pt-1" alt="" />
           Impact Connect
         </Link>
         <div className="space-x-6 flex items-center relative">

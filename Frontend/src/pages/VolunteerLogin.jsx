@@ -1,19 +1,31 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import Lottie from "lottie-react";
 import { FcGoogle } from "react-icons/fc";
 import animationData from "../assets/volunteerLogin.json";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import GoogleLogin from "../GoogleLogin";
-
+import { ContextAPI } from "../Context";
+import animationData1 from "../assets/Loading.json";
 export default function VolunteerAuth() {
   const [mode, setMode] = useState("login"); // "login" | "signup"
   const [showPass, setShowPass] = useState(false);
-
+  const { loading } = useContext(ContextAPI);
   const noop = (e) => e.preventDefault();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-slate-900 to-neutral-900 text-white flex items-center">
       <div className="w-full max-w-6xl mx-auto p-6">
+        {loading && (
+          <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-black/20 z-50">
+            <Lottie
+              animationData={animationData1}
+              loop={true}
+              style={{ height: 150, width: 150 }}
+            />
+          </div>
+        )}
+
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           {/* Left: Lottie (desktop only) */}
           <div className="hidden lg:flex items-center justify-start">
@@ -41,22 +53,20 @@ export default function VolunteerAuth() {
                 <button
                   type="button"
                   onClick={() => setMode("login")}
-                  className={`px-3 py-1 rounded-full text-sm ${
-                    mode === "login"
-                      ? "bg-cyan-500 text-black"
-                      : "text-gray-300"
-                  }`}
+                  className={`px-3 py-1 rounded-full text-sm ${mode === "login"
+                    ? "bg-cyan-500 text-black"
+                    : "text-gray-300"
+                    }`}
                 >
                   Login
                 </button>
                 <button
                   type="button"
                   onClick={() => setMode("signup")}
-                  className={`px-3 py-1 rounded-full text-sm ${
-                    mode === "signup"
-                      ? "bg-cyan-500 text-black"
-                      : "text-gray-300"
-                  }`}
+                  className={`px-3 py-1 rounded-full text-sm ${mode === "signup"
+                    ? "bg-cyan-500 text-black"
+                    : "text-gray-300"
+                    }`}
                 >
                   Signup
                 </button>
@@ -64,8 +74,8 @@ export default function VolunteerAuth() {
             </div>
 
             {/* Google button + "or continue" divider */}
-            <GoogleOAuthProvider clientId ='918931830865-ueogm526ioeastfsg9gfm54aktl1r41v.apps.googleusercontent.com'>
-                <GoogleLogin/>
+            <GoogleOAuthProvider clientId='918931830865-ueogm526ioeastfsg9gfm54aktl1r41v.apps.googleusercontent.com'>
+              <GoogleLogin />
             </GoogleOAuthProvider>
             {/* <div className="flex justify-center items-center mb-6">
               <button
