@@ -74,9 +74,10 @@ export default function VolunteerAuth() {
             </div>
 
             {/* Google button + "or continue" divider */}
-            <GoogleOAuthProvider clientId='918931830865-ueogm526ioeastfsg9gfm54aktl1r41v.apps.googleusercontent.com'>
+            <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
               <GoogleLogin />
             </GoogleOAuthProvider>
+
             {/* <div className="flex justify-center items-center mb-6">
               <button
                 type="button"
