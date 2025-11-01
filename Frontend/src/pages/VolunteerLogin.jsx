@@ -20,7 +20,7 @@ export default function VolunteerAuth() {
             <Lottie
               animationData={animationData1}
               loop={true}
-              style={{ height: 150, width: 150 }}
+              style={{ height: 120, width: 120 }}
             />
           </div>
         )}

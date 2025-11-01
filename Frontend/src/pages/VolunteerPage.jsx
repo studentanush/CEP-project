@@ -79,7 +79,7 @@ const VolunteerPage = () => {
 
     try {
       const response = await axios.get(BACKEND_URL + "/ngo/posts");
-      const posts = response?.data?.posts || [];
+      const posts = response?.data?.posts.filter(p=> p.status==="active") || [];
       setPosts(posts);
     } catch (error) {
       console.log(error);

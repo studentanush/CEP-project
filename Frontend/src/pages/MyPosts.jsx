@@ -137,7 +137,7 @@ const [showDeletePopup, setShowDeletePopup] = useState(false);
         "Mental Health & Counselling",
         "Special Needs Support",
     ];
-    const statuses = ["active", "completed"];
+    const statuses = ["active", "completed","closed"];
 
 
     useEffect(() => {
@@ -446,7 +446,7 @@ const [showDeletePopup, setShowDeletePopup] = useState(false);
 
                         {/* Filters */}
                         <div className="flex flex-wrap gap-3 mb-8 sticky top-0 bg-gray-900/80 backdrop-blur-md py-3 z-10">
-                            {["All", "Active", "Completed"].map((type) => (
+                            {["All", "Active", "Completed","Closed"].map((type) => (
                                 <button
                                     key={type}
                                     onClick={() => setFilter(type.toLowerCase())}
@@ -475,7 +475,7 @@ const [showDeletePopup, setShowDeletePopup] = useState(false);
                                                 ? "bg-emerald-600/20 text-emerald-400"
                                                 : post.status === "completed"
                                                     ? "bg-blue-600/20 text-blue-400"
-                                                    : "bg-yellow-600/20 text-yellow-400"
+                                                    : "bg-yellow-600/20 text-red-400"
                                                 }`}
                                         >
                                             {post.status.charAt(0).toUpperCase() + post.status.slice(1)}

@@ -24,6 +24,7 @@ const NGOPage = () => {
     totalPosts: 0,
     activeOpportunities: 0,
     completedOpportunities: 0,
+    closedOpportunities:0,
     totalVolunteers: 0,
   });
   const data = async () => {
@@ -50,6 +51,7 @@ const NGOPage = () => {
       const activeOpportunities = posts.filter(p => p.status === "active").length;
 
       const completedOpportunities = posts.filter(p => p.status === "completed").length;
+      const closedOpportunities = posts.filter(p => p.status === "closed").length;
       const totalVolunteers = volunteer.length;
       console.log(posts)
       console.log(activeOpportunities);
@@ -57,6 +59,7 @@ const NGOPage = () => {
         totalPosts,
         activeOpportunities,
         completedOpportunities,
+         closedOpportunities,
         totalVolunteers,
       })
 
@@ -73,6 +76,7 @@ const NGOPage = () => {
   const opportunityData = [
     { name: "Active", value: stats.activeOpportunities },
     { name: "Completed", value: stats.completedOpportunities },
+    { name: "Closed", value: stats.closedOpportunities },
   ];
 
   const volunteerData = useMemo(() => {
@@ -99,7 +103,8 @@ const NGOPage = () => {
   }, [volunteers]);
   console.log(volunteerData);
 
-  const COLORS = ["#60A5FA", "#34D399"];
+  const COLORS = ["#60A5FA", "#34D399", "#EF4444"];
+
 
   return (
     <div className="flex">
