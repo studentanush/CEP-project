@@ -301,7 +301,7 @@ ngoRouter.get("/checkAppliers", volunteerMiddleware, async (req, res) => {
         console.log("get " + ngoDataId)
         const response = await appliedVolunteerDataModel.find({
             ngoDataId: (ngoDataId),
-            //userId: (req.userId),
+            userId: (req.userId),
         });
         console.log(response)
         res.json({

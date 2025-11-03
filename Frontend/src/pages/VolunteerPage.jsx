@@ -19,6 +19,7 @@ const VolunteerPage = () => {
 
     try {
       const userInfo = JSON.parse(localStorage.getItem("user-info"));
+      console.log(userInfo);
       const token = userInfo?.token;
       const checkres = await axios.get(BACKEND_URL + "/ngo/checkAppliers", {
         headers: {
@@ -80,6 +81,7 @@ const VolunteerPage = () => {
     try {
       const response = await axios.get(BACKEND_URL + "/ngo/posts");
       const posts = response?.data?.posts.filter(p=> p.status==="active") || [];
+      console.log(posts);
       setPosts(posts);
     } catch (error) {
       console.log(error);
@@ -265,7 +267,7 @@ const VolunteerPage = () => {
               (type === "" || post.postType === type) &&
               (location === "" || post.location.toLowerCase().includes(location.toLowerCase())) &&
               (search === "" ||
-                post.title.toLowerCase().includes(search.toLowerCase()) ||
+                post.ngoUserId.name.toLowerCase().includes(search.toLowerCase()) ||
                 post.desc.toLowerCase().includes(search.toLowerCase()))
             ).map((post, index) => (
               <div
